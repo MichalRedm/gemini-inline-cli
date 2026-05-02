@@ -1,0 +1,9 @@
+name: "Gemini Inline CLI"
+version: "1.0"
+description: "A professional repository configuration for the Gemini Inline CLI tool."
+layers:
+  rules: "./rules"
+  context: "./context"
+metadata:
+  primary_agent: "Antigravity"
+  objective: "Implement a CLI tool that watches files for @gemini: comments and executes them using the Gemini CLI."
