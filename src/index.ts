@@ -47,31 +47,7 @@ async function setup(targetDir: string) {
   // Write hook script
   fs.writeFileSync(watcherPath, HOOK_SCRIPT);
 
-  try {
-    console.log(`[System] Authorizing hooks via 'gemini trust'...`);
-    
-    // Purge API keys for trust command too
-    const cleanEnv = { ...process.env };
-    delete cleanEnv.GEMINI_API_KEY;
-    delete cleanEnv.GOOGLE_API_KEY;
-    delete cleanEnv.API_KEY;
-    Object.keys(cleanEnv).forEach(key => {
-      if (key.toUpperCase() === 'GEMINI_API_KEY' || 
-          key.toUpperCase() === 'GOOGLE_API_KEY' || 
-          key.toUpperCase() === 'API_KEY') {
-        delete cleanEnv[key];
-      }
-    });
 
-    // Use shell: true for Windows compatibility
-    execSync('npx -y @google/gemini-cli trust', { 
-      cwd: targetDir, 
-      stdio: 'inherit',
-      env: cleanEnv
-    });
-  } catch (e) {
-    console.warn(`[System] Warning: 'gemini trust' failed. You may need to run it manually.`);
-  }
 }
 
 program
@@ -84,21 +60,11 @@ program
     
     await setup(targetDir);
 
-    console.log(`[System] Starting persistent Gemini session...`);
-    console.log(`[System] The agent will now monitor your files and resolve @gemini tags automatically.`);
-    
-    const daemonPrompt = `You are a helpful coding assistant running in daemon mode. 
-Your job is to scan the project files for comments starting with "@gemini: [task]".
-When you find such a comment, perform the requested task and replace the comment with "@resolved: [task]".
-The user will trigger your scan by saving files. 
-Always aim for high-quality, production-ready code.`;
-
     // Purge ALL API key variations to force OAuth
     const cleanEnv = { ...process.env };
     delete cleanEnv.GEMINI_API_KEY;
     delete cleanEnv.GOOGLE_API_KEY;
     delete cleanEnv.API_KEY;
-    // Also handle case-insensitive variations for safety
     Object.keys(cleanEnv).forEach(key => {
       if (key.toUpperCase() === 'GEMINI_API_KEY' || 
           key.toUpperCase() === 'GOOGLE_API_KEY' || 
@@ -107,7 +73,14 @@ Always aim for high-quality, production-ready code.`;
       }
     });
 
-    const child = spawn('npx', ['-y', '@google/gemini-cli', 'ask', daemonPrompt], {
+
+
+    console.log(`[System] Starting persistent Gemini session...`);
+    console.log(`[System] The agent will now monitor your files and resolve @gemini tags automatically.`);
+    
+    const daemonPrompt = "Enter daemon mode. Whenever a TODO @gemini appears, resolve it immediately. Use the AfterAgent hook to wait for my next edit.";
+
+    const child = spawn('npx', ['-y', '@google/gemini-cli@0.39.1', '--yolo', '-p', `"${daemonPrompt.replace(/"/g, '\\"')}"`], {
       cwd: targetDir,
       stdio: 'inherit',
       shell: true,
