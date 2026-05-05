@@ -24,7 +24,17 @@ async function setup(targetDir: string) {
     approvalMode: "yolo",
     contextRotation: "auto",
     hooks: {
-      afterAgent: ["node .gemini/hooks/watcher.js"]
+      AfterAgent: [
+        {
+          matcher: "*",
+          hooks: [
+            {
+              type: "command",
+              command: "node .gemini/hooks/watcher.js"
+            }
+          ]
+        }
+      ]
     }
   };
   fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
