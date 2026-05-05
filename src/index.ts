@@ -23,6 +23,11 @@ async function setup(targetDir: string) {
   const settings = {
     approvalMode: "yolo",
     contextRotation: "auto",
+    security: {
+      auth: {
+        selectedType: "oauth-personal"
+      }
+    },
     hooks: {
       AfterAgent: [
         {
@@ -45,7 +50,11 @@ async function setup(targetDir: string) {
   try {
     console.log(`[System] Authorizing hooks via 'gemini trust'...`);
     // Use shell: true for Windows compatibility
-    execSync('gemini trust', { cwd: targetDir, stdio: 'inherit' });
+    execSync('gemini trust', { 
+      cwd: targetDir, 
+      stdio: 'inherit',
+      env: { ...process.env, GEMINI_API_KEY: '' }
+    });
   } catch (e) {
     console.warn(`[System] Warning: 'gemini trust' failed. You may need to run it manually.`);
   }
@@ -70,11 +79,14 @@ When you find such a comment, perform the requested task and replace the comment
 The user will trigger your scan by saving files. 
 Always aim for high-quality, production-ready code.`;
 
+    // Filter out GEMINI_API_KEY from environment to force OAuth
+    const { GEMINI_API_KEY, ...cleanEnv } = process.env;
+
     const child = spawn('gemini', ['ask', daemonPrompt], {
       cwd: targetDir,
       stdio: 'inherit',
       shell: true,
-      env: { ...process.env, GEMINI_CLI_TRUST_WORKSPACE: 'true' }
+      env: { ...cleanEnv, GEMINI_CLI_TRUST_WORKSPACE: 'true' }
     });
 
     child.on('exit', (code) => {
