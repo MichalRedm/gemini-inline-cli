@@ -155,6 +155,3 @@ vite.config.ts.timestamp-*
 
 # Environment files
 .env
-
-# Agent Blueprint
-Agent Blueprint_ Gemini Inline CLI.md

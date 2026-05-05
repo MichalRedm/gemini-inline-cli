@@ -1,7 +1,7 @@
 {
   "name": "gemini-inline",
-  "version": "1.0.0",
-  "description": "A CLI tool to collaborate with Gemini on local files via inline comments.",
+  "version": "2.0.0",
+  "description": "A CLI tool to collaborate with Gemini on local files via inline comments (Daemon Mode).",
   "main": "dist/index.js",
   "bin": {
     "gemini-inline": "./dist/index.js"
@@ -12,7 +12,6 @@
     "dev": "tsc --watch"
   },
   "dependencies": {
-    "chokidar": "^3.5.3",
     "commander": "^11.1.0"
   },
   "devDependencies": {
