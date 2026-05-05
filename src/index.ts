@@ -24,7 +24,7 @@ async function setup(targetDir: string) {
     approvalMode: "yolo",
     contextRotation: "auto",
     hooks: {
-      afterAgent: "node .gemini/hooks/watcher.js"
+      afterAgent: ["node .gemini/hooks/watcher.js"]
     }
   };
   fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
@@ -63,7 +63,8 @@ Always aim for high-quality, production-ready code.`;
     const child = spawn('gemini', ['ask', daemonPrompt], {
       cwd: targetDir,
       stdio: 'inherit',
-      shell: true
+      shell: true,
+      env: { ...process.env, GEMINI_CLI_TRUST_WORKSPACE: 'true' }
     });
 
     child.on('exit', (code) => {
