@@ -49,11 +49,25 @@ async function setup(targetDir: string) {
 
   try {
     console.log(`[System] Authorizing hooks via 'gemini trust'...`);
+    
+    // Purge API keys for trust command too
+    const cleanEnv = { ...process.env };
+    delete cleanEnv.GEMINI_API_KEY;
+    delete cleanEnv.GOOGLE_API_KEY;
+    delete cleanEnv.API_KEY;
+    Object.keys(cleanEnv).forEach(key => {
+      if (key.toUpperCase() === 'GEMINI_API_KEY' || 
+          key.toUpperCase() === 'GOOGLE_API_KEY' || 
+          key.toUpperCase() === 'API_KEY') {
+        delete cleanEnv[key];
+      }
+    });
+
     // Use shell: true for Windows compatibility
-    execSync('gemini trust', { 
+    execSync('npx -y @google/gemini-cli trust', { 
       cwd: targetDir, 
       stdio: 'inherit',
-      env: { ...process.env, GEMINI_API_KEY: '' }
+      env: cleanEnv
     });
   } catch (e) {
     console.warn(`[System] Warning: 'gemini trust' failed. You may need to run it manually.`);
@@ -79,10 +93,21 @@ When you find such a comment, perform the requested task and replace the comment
 The user will trigger your scan by saving files. 
 Always aim for high-quality, production-ready code.`;
 
-    // Filter out GEMINI_API_KEY from environment to force OAuth
-    const { GEMINI_API_KEY, ...cleanEnv } = process.env;
+    // Purge ALL API key variations to force OAuth
+    const cleanEnv = { ...process.env };
+    delete cleanEnv.GEMINI_API_KEY;
+    delete cleanEnv.GOOGLE_API_KEY;
+    delete cleanEnv.API_KEY;
+    // Also handle case-insensitive variations for safety
+    Object.keys(cleanEnv).forEach(key => {
+      if (key.toUpperCase() === 'GEMINI_API_KEY' || 
+          key.toUpperCase() === 'GOOGLE_API_KEY' || 
+          key.toUpperCase() === 'API_KEY') {
+        delete cleanEnv[key];
+      }
+    });
 
-    const child = spawn('gemini', ['ask', daemonPrompt], {
+    const child = spawn('npx', ['-y', '@google/gemini-cli', 'ask', daemonPrompt], {
       cwd: targetDir,
       stdio: 'inherit',
       shell: true,
